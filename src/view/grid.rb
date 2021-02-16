@@ -20,19 +20,22 @@ module View
       render_snake(state)
       render_food(state)
     end
+
     def render_food(state)
+      @food.remove if @food
       extend Ruby2D::DSL
       food = state.food
-      Square.new(y: food.row*@pixel_size, x: food.col*@pixel_size,  size: @pixel_size, color: 'yellow')
+      @food = Square.new(y: food.row*@pixel_size, x: food.col*@pixel_size,  size: @pixel_size, color: 'yellow')
     end
+
     def render_snake(state)
+      @snake_positions.each(&:remove) if @snake_positions
+      
       extend Ruby2D::DSL
       snake = state.snake
-      snake.positions.each do |position|
+      @snake_positions = snake.positions.map do |position|
         Square.new(y: position.row*@pixel_size, x: position.col*@pixel_size,  size: @pixel_size, color: 'brown')
- 
       end
-
       # for position in snake.positions do
       #   Square.new(x: position.row*@pixel_size, y: position.col*@pixel_size,  size: @pixel_size)
       # end
