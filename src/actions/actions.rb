@@ -1,12 +1,19 @@
 require_relative "./../model/state"
+require_relative "./../view/grid"
 require "ruby2d"
 
 module Actions
   def self.move_snake(state)
+    # puts "move snake"
     curr_direction = state.curr_direction
     next_position = calc_next_position(state)
-    # check if still valid
-    if position_still_valid?(state, next_position)
+
+    if position_is_food?(state, next_position)
+      # puts "position is food"
+      state = grow_snake_to(state, next_position)
+      calc_next_food(state)
+      # check if still valid
+    elsif position_still_valid?(state, next_position)
       # else move snake
       move_snake_to(state, next_position)
     else
@@ -16,12 +23,11 @@ module Actions
   end
 
   def self.change_direction(state, direction)
-    puts "entro"
+    # puts "entro change direction"
     if next_direction_is_valid?(state, direction)
-      puts "entro a cambio"
       state.curr_direction = direction
     else
-      puts "Invalid direction"
+      # puts "Invalid direction"
     end
     state
   end
@@ -50,6 +56,13 @@ module Actions
     end
   end
 
+  def self.calc_next_food(state)
+    curr_position = state.food
+    next_food = Model::Food.new(rand(state.grid.rows), rand(state.grid.cols))
+    state.food = next_food
+    state
+  end
+
   def self.position_still_valid?(state, position)
     # verificar q este en la grilla
     is_invalid = ((position.row >= state.grid.rows || position.row < 0) ||
@@ -57,6 +70,18 @@ module Actions
     return false if is_invalid
     # verificar q no este superponiendo a la serpiente
     return !(state.snake.positions.include? position)
+  end
+
+  def self.position_is_food?(state, position)
+    # verificar q este en la grilla
+    position.col == state.food.col && position.row == state.food.row
+  end
+
+  def self.grow_snake_to(state, next_position)
+    # todo: increment
+    new_positions = [next_position] + state.snake.positions
+    state.snake.positions = new_positions
+    state
   end
 
   def self.move_snake_to(state, next_position)
